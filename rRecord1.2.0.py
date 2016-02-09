@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python
 
 # ToDo turn this into a module for writing any csv file into any MySQL table
 
@@ -67,7 +67,8 @@ class Sub_Record:
 
     def CreateTable(self):
         c.execute(
-            "CREATE TABLE %s(title VARCHAR(100) NOT NULL, author VARCHAR(20) NOT NULL, num_comments SMALLINT UNSIGNED NULL, downs MEDIUMINT UNSIGNED NULL, ups MEDIUMINT UNSIGNED NULL, score MEDIUMINT UNISGNED NULL, datetime TIMESTAMP NOT NULL, post_id INT UNSIGNED NOT NULL PRIMARY KEY)" % self.title)
+            "CREATE TABLE %s(title VARCHAR(100) NOT NULL, author VARCHAR(20) NOT NULL, num_comments SMALLINT UNSIGNED NULL, downs MEDIUMINT UNSIGNED NULL, ups MEDIUMINT UNSIGNED NULL, score MEDIUMINT UNSIGNED NULL, datetime TIMESTAMP NOT NULL, post_id INT UNSIGNED NOT NULL PRIMARY KEY)" % self.title)
+        c.connect.commit()
 
     def AppendTable(self):
         c.execute('INSERT INTO %s VALUES(%s, %s, %d, %d, %d, %d, %s)' % (self.title,
@@ -79,6 +80,7 @@ class Sub_Record:
                                                                          self.score,
                                                                          self.post_id)
                   )
+        c.connect.commit()
 
     def __destroyTable(self):
         pass  # TODO write destroyTable function in class rQuery_Submission_record
@@ -98,7 +100,7 @@ def csv_to_mysql(file):     #function writes file to MySQL database using Sub_Re
             # create Sub_Record instance for each submission
             x = Sub_Record(*attribute_list) # TODO note the warning about attribute_list being referenced before being assigned
 
-            if submission.id not in RASID:
+            if submission['submission_id'] not in ralid:
                 x.CreateTable()
                 RASID.append(submission.id)
                 x.AppendTable()

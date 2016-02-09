@@ -106,3 +106,6 @@ else:
         dict_writer.writeheader()
         for post in top_posts:
             dict_writer.writerow(post)
+
+# TODO write functions for pulling data
+# TODO eliminate for loops
