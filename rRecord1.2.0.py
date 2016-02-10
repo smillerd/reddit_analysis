@@ -65,48 +65,61 @@ class Sub_Record:
         self.score = score
         self.post_id = post_id
 
+    def print_attributes(self):
+        print self.title
+        print self.author
+        print self.num_comments
+        print self.downs
+        print self.ups
+        print self.score
+        print self.post_id
+
     def CreateTable(self):
-        c.execute(
-            "CREATE TABLE %s(title VARCHAR(100) NOT NULL, author VARCHAR(20) NOT NULL, num_comments SMALLINT UNSIGNED NULL, downs MEDIUMINT UNSIGNED NULL, ups MEDIUMINT UNSIGNED NULL, score MEDIUMINT UNSIGNED NULL, datetime TIMESTAMP NOT NULL, post_id INT UNSIGNED NOT NULL PRIMARY KEY)" % self.title)
-        c.connect.commit()
+        sql = "CREATE TABLE IF NOT EXISTS %s (title VARCHAR(50) NOT NULL, \
+                                  author VARCHAR(20) NOT NULL, \
+                                  num_comments SMALLINT UNSIGNED NULL,\
+                                  downs MEDIUMINT UNSIGNED NULL, \
+                                  ups MEDIUMINT UNSIGNED NULL, \
+                                  score MEDIUMINT UNSIGNED NULL, \
+                                  post_id VARCHAR(6) NOT NULL PRIMARY KEY); " %self.post_id
+
+        c.execute(sql)
 
     def AppendTable(self):
-        c.execute('INSERT INTO %s VALUES(%s, %s, %d, %d, %d, %d, %s)' % (self.title,
-                                                                         self.title,
-                                                                         self.author,
-                                                                         self.num_comments,
-                                                                         self.downs,
-                                                                         self.ups,
-                                                                         self.score,
-                                                                         self.post_id)
-                  )
-        c.connect.commit()
+        post_id = str(self.post_id)
+        title = str(self.title)
+        author = str(self.author)
+        num_comments = self.num_comments
+        downs = self.downs
+        ups = self.ups
+        score = self.score
+
+
+        sql = "INSERT INTO '%s'(title, author, num_comments, downs, ups, score, post_id) \
+       VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s' )" % \
+       (post_id, title, author, num_comments, downs, ups, score, post_id)
+        try:
+            c.execute(sql)
+            c.commit
+        except:
+            pass
 
     def __destroyTable(self):
         pass  # TODO write destroyTable function in class rQuery_Submission_record
 def csv_to_mysql(file):     #function writes file to MySQL database using Sub_Record from record_thing.py
     # retrieve data from temp.csv - store as list_of_dicts = []
     with open(file, 'rb') as csvfile:
-        list_of_dicts = csv.DictReader(csvfile, dialect='excel')
-
+        list_of_dicts = csv.DictReader(csvfile)
         # Class Sub_Record requires a long list of attributes, each submission in list_of_dicts contains keys
         # each key represents the type of attribute that must be defined
         for submission in list_of_dicts:
-            # attribute_list will be the parameters for creating the Sub_Record instance
-            attribute_list = []
-            for attribute in submission:
-                attribute_list.append(attribute)
 
             # create Sub_Record instance for each submission
-            x = Sub_Record(*attribute_list) # TODO note the warning about attribute_list being referenced before being assigned
+            x = Sub_Record(submission['title'], submission['author'], submission['num_comments'],
+                           submission['downs'], submission['ups'], submission['score'], submission['submission_id'])
 
-            if submission['submission_id'] not in ralid:
-                x.CreateTable()
-                RASID.append(submission.id)
-                x.AppendTable()
-            else:
-                x.AppendTable()
-
+            x.CreateTable()
+            x.AppendTable()
 '''
 ---------------------------------------------------------------------------------------------
 '''
@@ -118,7 +131,6 @@ if RASID_inst.RASID_check():
     RASID_inst.RASID_open()
 else:
     RASID_inst.RASID_open_new()
-
 # open csv and save it to the MySQL database specified in Sub_Record
 csv_to_mysql('temp.csv')
 
