@@ -6,7 +6,7 @@ import pymysql.cursors
 # Connect to the database
 connection = pymysql.connect(host='localhost',
                              user='seth',
-                             password='cookies',
+                             password='cookies', #be sure to update these fields
                              db='rQuery_data')
 
 # connect to reddit
@@ -27,7 +27,7 @@ def submission_fetcher(sub, limit):
 def mysql_writer():
     with connection.cursor() as cursor:
         sql = "CREATE TABLE IF NOT EXISTS `posts` (title VARCHAR(100) NOT NULL PRIMARY KEY, author VARCHAR(20) NOT NULL, num_comments SMALLINT NULL, downs INT NULL, ups INT NULL, score INT NULL, post_id INT NOT NULL)"
-        
+
         cursor.execute(sql)
 
     for submission in top_posts:
